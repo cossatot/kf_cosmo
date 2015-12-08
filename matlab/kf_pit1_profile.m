@@ -7,6 +7,14 @@ tic
 addpath('C:\research\cosmo\dal_geo_centre\DepthCodeSAMarrero\profilecalc\')
 addpath('C:\research\cosmo\dal_geo_centre\DepthCodeSAMarrero\production\')
 
+%addpath('~/research/cosmo/CRONUS-calc-June-23-2015/common/production/')
+%addpath('~/research/cosmo/CRONUS-calc-June-23-2015/sa/production/')
+%addpath('~/research/cosmo/CRONUS-calc-June-23-2015/common/profilecalc/')
+
+
+addpath('~\research\cosmo\DepthCodeSAMarrero\profilecalc\')
+addpath('~\research\cosmo\DepthCodeSAMarrero\production\')
+
 
 % Load data
 load kf_pit1_chem.mat
@@ -52,6 +60,6 @@ fprintf('MAP_inher = %.2f years of exposure \n \n',MAP(3))
 % Create plots
 makeplots36(erates,ages,inhers,posterior_er,posterior_age,...
     posterior_inher,nominal36,uncerts36,depths,MAP,jposterior);
-save T6profileresults
+save kf_p1_results
 
 toc
