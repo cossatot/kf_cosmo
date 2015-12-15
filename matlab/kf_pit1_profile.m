@@ -32,22 +32,23 @@ depths = nominal36(:,37) + 0.5*nominal36(:,6).*nominal36(:,5);
 %ages=linspace(10,500,5)';
 %inhers=linspace(0,3.5e3,10)';
 
-inhers = linspace(0,0.1,2)';
+inhers = linspace(0,0.01,2)';
 
 unif_rand = @(umax, umin, unum) (umin + (umax - umin) .* rand(unum, 1));
 
-er_min = -3;
-er_max = 3;
-er_num = 5;
+er_min = 0;
+er_max = 1;
+er_num = 2;
 
-erates = unif_rand(er_min, er_max, er_num);
+%erates = unif_rand(er_min, er_max, er_num);
+erates = linspace(er_min, er_max, er_num)';
 
-age_min = 50;
+age_min = 150;
 age_max = 300;
-age_num = 20;
+age_num = 100;
 
-ages = unif_rand(age_min, age_max, age_num);
-
+%ages = unif_rand(age_min, age_max, age_num);
+ages = linspace(age_min, age_max, age_num)';
 
 % Define the prior distribution
 pr=prior(erates,ages,inhers,'uniform','uniform','uniform');
