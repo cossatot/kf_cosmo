@@ -1,3 +1,29 @@
+function [age_prior, er_prior, inher_prior] = sample_priors(ages, erates, ...
+                                                  inhers, n_iters, max_erosion)
+
+    age_prior = sample_pdf(ages(1), ages(2), n_iters, get_prior_type(ages));
+    er_prior = sample_pdf(erates(1), erates(2), n_iters, ...
+                          get_prior_type(erates));
+    inher_prior = sample_pdf(inhers(1), inhers(2), n_iters, ...
+                             get_prior_type(inhers));
+    if nargin == 4
+        max_erosion = +inf;
+    elseif nargin == 5
+        [age_prior, er_prior, inher_prior] = remove_too_much_erosion(age_prior,...
+            er_prior, inher_prior, max_erosion);
+    end
+end
+
+
+function priortype = get_prior_type(prior)
+    if length(prior) == 2
+        priortype = 'unif_rnd';
+    elseif length(prior) > 2
+        priortype = 'arb_rnd';
+    end
+end
+
+
 function pdf_samples = sample_pdf(vals, probs, n_samples, type)
 
     switch type
@@ -41,7 +67,7 @@ function [cdf_range, cdf_vals] = make_cdf(pdf_range, pdf_vals)
 end
 
 
-function unif_rand_samples = unif_rand(umax, umin, unum) 
+function unif_rand_samples = unif_rand(umin, umax, unum) 
     unif_rand_samples = umin + (umax - umin) .* rand(unum, 1);
 end
 
@@ -53,3 +79,13 @@ function mono_increase(x)
         disp('not all mono');
     end
 end
+
+
+function [ages, erates, inhers] = remove_too_much_erosion(ages, erates, ...
+                                                          inhers, max_erosion)
+    not_too_much_erosion = (ages .* erates < max_erosion);
+    ages = ages(not_too_much_erosion);
+    erates = erates(not_too_much_erosion);
+    inhers = inhers(not_too_much_erosion);
+end
+                                                       

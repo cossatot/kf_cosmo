@@ -26,7 +26,7 @@ load kf_pit3_chem.mat
 depths = nominal36(:,37) + 0.5*nominal36(:,6).*nominal36(:,5);
 % ndepths=length(depths);
 
-max_erosion_cm = 200;
+max_erosion_cm = 100;
 max_erosion_g_cm2 = mean(nominal36(:,5)) * max_erosion_cm;
 
 % Define the paramter space
@@ -34,29 +34,32 @@ er_min = 0;
 er_max = 1;
 er_minmax = [er_min er_max];
 
-age_min = 0;
-age_max = 150;
+age_min = 00;
+age_max = 100;
 age_minmax = [age_min age_max];
 
 inher_min = 0;
-inher_max = 1e2;
+inher_max = 48e3; %this is the minimum sample conc. / 36cl surf prod rate
 inher_minmax = [inher_min inher_max];
 
-n_iters = 1000;
+n_iters = 100000;
 
-[posterior_er, posterior_age, posterior_inher, MAP, rel_likes] ...
-    = depth_profile_mc_36(nominal36, uncerts36(:,1), depths, ...
-    er_minmax, age_minmax, inher_minmax, n_iters, scaling_model, ...
-    max_erosion_g_cm2);
+[age_priors, er_priors, inher_priors] = sample_priors(age_minmax, ...
+                      er_minmax, inher_minmax, n_iters, max_erosion_g_cm2);
+
+[posterior_er, posterior_age, posterior_inher, MAP, rel_likes, ...
+    likelihoods] = depth_profile_mc_36(nominal36, uncerts36(:,1), ...
+                          depths, age_priors, er_priors, inher_priors, ...
+                          scaling_model);
 
 fprintf('MAP_erate = %.2f g/cm^2/kyr \n',MAP(1))
 fprintf('MAP_age   = %.2f k years \n',MAP(2))
-fprintf('MAP_inher = %.2f years of exposure \n \n',MAP(3))
+fprintf('MAP_inher = %.2f years \n \n',MAP(3))
 
 % Create plots
 %makeplots36(erates,ages,inhers,posterior_er,posterior_age,...
 %    posterior_inher,nominal36,uncerts36,depths,MAP,jposterior);
-save kf_p2_mc_results
+save kf_p3_mc_results
 
 figure;
 scatter(posterior_age, posterior_er, [], rel_likes, 'filled');
@@ -66,3 +69,21 @@ figure;
 plotprof36(nominal36, uncerts36(:,1), depths, MAP(1), MAP(2), MAP(3),...
     scaling_model);
 
+figure;
+subplot(131);
+[age_bw, age_pdf, age_xs, age_cdf] = kde(posterior_age, 1000, age_min,...
+                                         age_max);
+plot(age_xs, age_pdf);
+xlabel('Age (ka)');
+
+subplot(132);
+[er_bw, er_pdf, er_xs, er_cdf] = kde(posterior_er, 1000, er_min,...
+                                         er_max);
+plot(er_xs, er_pdf);
+xlabel('Erosion rate (some units)');
+
+subplot(133);
+[in_bw, in_pdf, in_xs, in_cdf] = kde(posterior_inher, 1000, inher_min,...
+                                     inher_max);
+plot(in_xs, in_pdf);
+xlabel('Inheritance (years)');

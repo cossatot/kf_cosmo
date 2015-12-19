@@ -26,12 +26,12 @@ maxdepth36 = 1000+deepest+er*age;
 [pp,sp36,sf36,cp36]=getpars36(averagesample,maxdepth36);
 sp36.epsilon=er;
 
-size(mydepths)
-size(er)
-size(age)
-
-[predictedN36]=predN36depth(pp,sp36,sf36,cp36,age,mydepths,er/1000,scaling_model);
+[predictedN36]=predN36depth(pp, sp36, sf36, cp36, age, mydepths, ...
+                            er/1000, scaling_model);
+                        
+% Line below is from the old predN36depth, not my function                        
 %[predN36measure]=predN36depth(pp,sp36,sf36,cp36,age,depths);
+
 Prodtotal=prodz36(0,pp,sf36,cp36);
 predictedN36=predictedN36+inher*Prodtotal;
 %predN36measure=predN36measure+inher*Prodtotal;
@@ -40,7 +40,9 @@ predictedN36=predictedN36+inher*Prodtotal;
 prodzpred=prodz36(depths,pp,sf36,cp36);
 
 %compute prodz for each actual composition & actual depth
-for j=1:numbersamples;
+prodzactual = zeros(numbersamples, 1);
+
+parfor j=1:numbersamples;
     sampledepth=depths(j);
     [pp,sp36,sf36,cp36]=getpars36(comp(j,:),(sampledepth+200));
     prodzactual(j)=prodz36(sampledepth,pp,sf36,cp36);

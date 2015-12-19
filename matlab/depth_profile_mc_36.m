@@ -1,6 +1,6 @@
-function [posterior_er, posterior_age, posterior_inher, MAP, rel_likes]...
-    = depth_profile_mc_36(comp, sigma, depths, erates, ages, ...
-    inhers, n_iters, scaling_model, maxerosion)
+function [posterior_er, posterior_age, posterior_inher, MAP, rel_likes,...
+    likelihoods] = depth_profile_mc_36(comp, sigma, depths, age_priors, er_priors, ...
+                          inher_priors, scaling_model)
 %
 %   Monte Carlo-based Age Profile Calculator for Cl36
 %
@@ -29,9 +29,6 @@ function [posterior_er, posterior_age, posterior_inher, MAP, rel_likes]...
 %       mu_bayes                 bayesian mean solution
 %
 
-if nargin==8
-    maxerosion=+inf;
-end
 
 
 % Set global variables
@@ -60,25 +57,11 @@ measuredconc36=comp(:,1);
 sigma36=sigma(:,1);
 
 
-%make priors
-unif_rand = @(umax, umin, unum) (umin + (umax - umin) .* rand(unum, 1));
-
-age_priors = unif_rand(ages(1), ages(2), n_iters);
-er_priors = unif_rand(erates(1), erates(2), n_iters);
-inher_priors = unif_rand(inhers(1), inhers(2), n_iters);
-
-not_too_much_erosion = (age_priors .* er_priors < maxerosion);
-
-fprintf('%.0f MC runs have too much erosion; not using \n',...
-    (n_iters - sum(not_too_much_erosion)));
-age_priors = age_priors(not_too_much_erosion);
-er_priors = er_priors(not_too_much_erosion);
-inher_priors = inher_priors(not_too_much_erosion);
 
 n_iters = length(age_priors);
 
 % Define maxdepth
-maxdepth=max(erates)*max(ages)*max(comp(:,6))+3000;
+maxdepth=max(er_priors)*max(age_priors)*max(comp(:,6))+3000;
 
 
 % Run getpars on the first sample(choice abitrary) to get and store
@@ -98,9 +81,11 @@ toc;
 
 disp('doing 36Cl Monte Carlo')
 
+ProdtotalCl=prodz36(0,pp,sf,cp);
+
 tic;
 parfor sample = 1:nsamples
-    ProdtotalCl=prodz36(0,pp,sf,cp);
+    %ProdtotalCl=prodz36(0,pp,sf,cp);
     for iter = 1:n_iters
         epsilon = er_priors(iter)/1000.;
         pred_36cl_conc{sample}(iter) = predN36depth(pp, sp, sf, cp, ... 
